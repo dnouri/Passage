@@ -37,22 +37,9 @@ def case_insensitive_import(module, name):
     return getattr(module, mapping[name.lower()])
 
 def load(path):
-    import layers
-    import models
-    model = cPickle.load(open(path))
-    model_class = getattr(models, model['model'])
-    model['config']['layers'] = [getattr(layers, layer['layer'])(**layer['config']) for layer in model['config']['layers']]
-    model = model_class(**model['config'])
-    return model
+    with open(path, 'rb') as f:
+        return cPickle.load(f)
 
 def save(model, path):
-    layer_configs = []
-    for layer in model.layers:
-        layer_config = layer.settings
-        layer_name = layer.__class__.__name__
-        weights = [p.get_value() for p in layer.params]
-        layer_config['weights'] = weights
-        layer_configs.append({'layer':layer_name, 'config':layer_config})
-    model.settings['layers'] = layer_configs
-    serializable_model = {'model':model.__class__.__name__, 'config':model.settings}
-    cPickle.dump(serializable_model, open(path, 'wb'))
+    with open(path, 'wb') as f:
+        cPickle.dump(model, f)

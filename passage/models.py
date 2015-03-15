@@ -124,3 +124,22 @@ class RNN(object):
             preds.append(pred)
             idxs.extend(idxmb)
         return np.vstack(preds)[np.argsort(idxs)]
+
+    def __getstate__(self):
+        layer_configs = []
+        for layer in self.layers:
+            layer_config = layer.settings
+            layer_name = layer.__class__.__name__
+            weights = [p.get_value() for p in layer.params]
+            layer_config['weights'] = weights
+            layer_configs.append({'layer': layer_name, 'config': layer_config})
+        self.settings['layers'] = layer_configs
+        return {'config': self.settings}
+
+    def __setstate__(self, state):
+        from passage import layers
+        state['config']['layers'] = [
+            getattr(layers, layer['layer'])(**layer['config'])
+            for layer in state['config']['layers']
+            ]
+        self.__init__(**state['config'])
