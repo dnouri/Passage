@@ -126,7 +126,7 @@ class Tokenizer(object):
         tokens = [[self.encoder.get(token, 2) for token in text] for text in texts]
         return tokens
 
-    def fit_transform(self, texts):
+    def fit_transform(self, texts, y=None):
         self.fit(texts)
         tokens = self.transform(texts)
         return tokens
